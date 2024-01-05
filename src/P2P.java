@@ -202,22 +202,22 @@ public class P2P extends javax.swing.JFrame {
         double LKR=Double.parseDouble(lkrbox.getText());
         double rate=Double.parseDouble(ratebox.getText());
         String note=notebox.getText();
-        
+        String id=idlabel.getText();
         try{
             
-            //INSERT INTO buy(Date,DEaler,USDT,LKR,Rate,Note) VALUES('"+date+"','"+dealer+"','"+USDT"','"+LKR+"','"+rate+"','"+note+"')
-            //String sql= "INSERT INTO buy(Date,DEaler,USDT,LKR,Rate,Note) VALUES('"+date+"','"+dealer+"','"+USDT"','"+LKR+"','"+rate+"','"+note+"')";
+            
             String sql;
-            //var x;
+           
             int x=tabs.getSelectedIndex();
-            //System.out.println(x);
+         
             sql = switch (x) {
-                case 0 -> " UPDATE buy SET Date ='"+date+"' , Dealer ='"+dealer+"'  ,USDT='"+USDT+"',LKR='"+LKR+"',Rate='"+rate+"',Note='"+note+"' WHERE id='"+idlabel+"' ";
-                case 1 -> " UPDATE sell SET Date ='"+date+"' , Dealer ='"+dealer+"'  ,USDT='"+USDT+"',LKR='"+LKR+"',Rate='"+rate+"',Note='"+note+"' WHERE id='"+idlabel+"' ";
+                case 0 -> " UPDATE buy SET Date ='"+date+"' , Dealer ='"+dealer+"'  ,USDT='"+USDT+"',LKR='"+LKR+"',Rate='"+rate+"',Note='"+note+"' WHERE id='"+id+"' ";
+                case 1 -> " UPDATE sell SET Date ='"+date+"' , Dealer ='"+dealer+"'  ,USDT='"+USDT+"',LKR='"+LKR+"',Rate='"+rate+"',Note='"+note+"' WHERE id='"+id+"' ";
                 default -> " ";
             };
             pst=conn.prepareStatement(sql);
-            pst.executeUpdate();
+            pst.execute();
+              JOptionPane.showMessageDialog(this, "Updated.!", "Update record", JOptionPane.WARNING_MESSAGE);
         }
         catch(SQLException e) {
             
@@ -228,6 +228,24 @@ public class P2P extends javax.swing.JFrame {
     
     }
     
+    public void delete(){
+    
+    
+        String id=idlabel.getText();
+        
+        String sql="DELETE FROM buy WHERE id='"+id+"'";
+        
+        try {
+            
+            conn.prepareStatement(sql).execute();
+            JOptionPane.showMessageDialog(null,"Deleted.!");
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+        
+    
+    }
     
     
     @SuppressWarnings("unchecked")
@@ -305,6 +323,11 @@ public class P2P extends javax.swing.JFrame {
         jPanel1.add(exitBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 470, -1, -1));
 
         updateBtn.setText("Update");
+        updateBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                updateBtnActionPerformed(evt);
+            }
+        });
         jPanel1.add(updateBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 390, -1, -1));
 
         insertBtn.setText("Insert");
@@ -316,6 +339,11 @@ public class P2P extends javax.swing.JFrame {
         jPanel1.add(insertBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 390, -1, -1));
 
         deleteBtn.setText("Delete");
+        deleteBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteBtnActionPerformed(evt);
+            }
+        });
         jPanel1.add(deleteBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 390, -1, -1));
 
         datebox.setDateFormatString("yyyy MM dd");
@@ -491,8 +519,28 @@ public class P2P extends javax.swing.JFrame {
         String s=searchBox.getText();
         String sql="SELECT * from buy";
         
+      int[] selectedRows = buytable.getSelectedRows();
+        System.out.println(selectedRows[0]);
+      
+        
         
     }//GEN-LAST:event_searchBoxKeyReleased
+
+    private void updateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateBtnActionPerformed
+        // TODO add your handling code here:
+        update();
+        buytableLoad();
+        selltableLoad();
+        clear();
+    }//GEN-LAST:event_updateBtnActionPerformed
+
+    private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
+        // TODO add your handling code here:
+        delete();
+        buytableLoad();
+        selltableLoad();
+        clear();
+    }//GEN-LAST:event_deleteBtnActionPerformed
 
     /**
      * @param args the command line arguments
