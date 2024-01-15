@@ -14,6 +14,8 @@ import javax.swing.JOptionPane;
 import net.proteanit.sql.DbUtils;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.security.auth.callback.ConfirmationCallback;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 /**
  *
@@ -22,8 +24,8 @@ import javax.swing.table.DefaultTableModel;
 public class P2P extends javax.swing.JFrame {
 
   Connection conn=null;
-    PreparedStatement pst=null;
-    ResultSet rs=null;
+  PreparedStatement pst,pst1,pst2,pst3=null;
+  ResultSet rs,rs1,rs2,rs3=null;
     
     public P2P() {
         initComponents();
@@ -31,6 +33,8 @@ public class P2P extends javax.swing.JFrame {
         //buytableLoad();
         buytableLoad();
         selltableLoad();
+        setAvg();
+        deleteAllBtn.setVisible(false);
         //selectedRow();
     }
 
@@ -225,15 +229,35 @@ public class P2P extends javax.swing.JFrame {
         
     
     }
+        catch(NullPointerException e){
+        
+                JOptionPane.showMessageDialog(this, "Fill Required fiedls", "Update Failed", ERROR);
+        
+        }
     
     }
     
     public void delete(){
     
-    
+        int i=tabs.getSelectedIndex();
+        System.out.println("tab="+i);
+        String k;
+        if(i==0){
+        
+            k="buy";
+            
+            
+            
+        }
+        else{
+            k="sell";
+            
+        }
         String id=idlabel.getText();
         
-        String sql="DELETE FROM buy WHERE id='"+id+"'";
+        
+        
+        String sql="DELETE FROM "+k+" WHERE id='"+id+"'";
         
         try {
             
@@ -246,6 +270,114 @@ public class P2P extends javax.swing.JFrame {
         
     
     }
+    
+    public void deleteAll(){
+        
+        
+       int r= JOptionPane.showConfirmDialog(this, "Are you sure", "Delete All", ConfirmationCallback.YES_NO_OPTION, JOptionPane.YES_NO_OPTION);
+       
+   
+        if(r==0){
+        
+    int i=tabs.getSelectedIndex();
+        System.out.println("tab="+i);
+        String k;
+        if(i==0){
+        
+            k="buy";
+            
+            
+            
+        }
+        else{
+            k="sell";
+            
+        }
+        
+        
+        
+        
+        String sql="DELETE FROM "+k;
+        
+        try {
+            
+            conn.prepareStatement(sql).execute();
+            JOptionPane.showMessageDialog(null,"Deleted.!");
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+        }
+    }
+    
+    public void setAvg(){
+    
+       
+       
+        Double buyLKRSum,sellLKRSum,buyUSDTSum,sellUSDTSum;
+        String buy,sell;
+        
+        String sqlavgbuy="SELECT SUM(LKR)/SUM(USDT) FROM buy";
+        String sqlavgsell="SELECT SUM(LKR)/SUM(USDT) FROM sell";
+         String sqlbuyLKRSum="SELECT SUM(LKR) FROM buy";
+        String sqlsellLKRSum="SELECT SUM(LKR) FROM sell";
+        
+        try {
+            pst=conn.prepareStatement(sqlavgbuy);
+            rs= pst.executeQuery();
+            
+            pst1=conn.prepareStatement(sqlavgsell);
+            rs1= pst1.executeQuery();
+            
+            pst2=conn.prepareStatement(sqlbuyLKRSum);
+            rs2= pst2.executeQuery();
+            
+            pst3=conn.prepareStatement(sqlsellLKRSum);
+            rs3= pst3.executeQuery();
+            
+            while(rs.next()){
+            
+                Double buy1=rs.getDouble(1);
+                System.out.println(buy1);
+                buy=buy1.toString();
+                 avgBuy.setText("BUY = "+buy);
+            }
+            
+            while(rs1.next()){
+            
+                Double sell1=rs1.getDouble(1);
+                System.out.println(sell1);
+                sell=sell1.toString();
+                 avgSell.setText("SELL = "+sell);
+            }
+            while(rs2.next() && rs3.next()){
+            
+                buyLKRSum=rs2.getDouble(1);
+                sellLKRSum=rs3.getDouble(1);
+                
+                Double prof=sellLKRSum-buyLKRSum;
+                
+                System.out.println(prof);
+                String profit=prof.toString();
+                plLabel.setText(profit);
+            }
+            
+            
+            
+            
+          
+        } catch (SQLException e) {
+            
+             JOptionPane.showMessageDialog(this, e, "Error", HIDE_ON_CLOSE);
+        }
+        
+        
+        
+       
+    
+    }
+    
+    
     
     
     @SuppressWarnings("unchecked")
@@ -274,6 +406,7 @@ public class P2P extends javax.swing.JFrame {
         dealerbox = new javax.swing.JTextField();
         searchBox = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
+        deleteAllBtn = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         tabs = new javax.swing.JTabbedPane();
         jPanel3 = new javax.swing.JPanel();
@@ -282,6 +415,12 @@ public class P2P extends javax.swing.JFrame {
         jPanel4 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         selltable = new javax.swing.JTable();
+        jPanel5 = new javax.swing.JPanel();
+        avgBuy = new javax.swing.JLabel();
+        avgSell = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        plLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -289,7 +428,8 @@ public class P2P extends javax.swing.JFrame {
         main.setBackground(new java.awt.Color(51, 51, 51));
         main.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jPanel1.setBackground(java.awt.Color.darkGray);
+        jPanel1.setBackground(new java.awt.Color(153, 153, 0));
+        jPanel1.setForeground(new java.awt.Color(0, 0, 0));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setText("ID : ");
@@ -328,7 +468,7 @@ public class P2P extends javax.swing.JFrame {
                 updateBtnActionPerformed(evt);
             }
         });
-        jPanel1.add(updateBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 390, -1, -1));
+        jPanel1.add(updateBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 390, -1, -1));
 
         insertBtn.setText("Insert");
         insertBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -339,6 +479,24 @@ public class P2P extends javax.swing.JFrame {
         jPanel1.add(insertBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 390, -1, -1));
 
         deleteBtn.setText("Delete");
+        deleteBtn.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                deleteBtnMouseMoved(evt);
+            }
+        });
+        deleteBtn.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                deleteBtnFocusGained(evt);
+            }
+        });
+        deleteBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                deleteBtnMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                deleteBtnMouseExited(evt);
+            }
+        });
         deleteBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 deleteBtnActionPerformed(evt);
@@ -388,6 +546,22 @@ public class P2P extends javax.swing.JFrame {
         jLabel8.setText("Search");
         jPanel1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 300, -1, -1));
 
+        deleteAllBtn.setText("Delete All");
+        deleteAllBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                deleteAllBtnMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                deleteAllBtnMouseExited(evt);
+            }
+        });
+        deleteAllBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteAllBtnActionPerformed(evt);
+            }
+        });
+        jPanel1.add(deleteAllBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 410, 90, 30));
+
         main.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 350, 540));
 
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -407,7 +581,15 @@ public class P2P extends javax.swing.JFrame {
             new String [] {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         buytable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 buytableMouseClicked(evt);
@@ -450,11 +632,31 @@ public class P2P extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(selltable);
 
-        jPanel4.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 670, 270));
+        jPanel4.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 680, 270));
 
         tabs.addTab("SELL", jPanel4);
 
         jPanel2.add(tabs, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 680, 310));
+
+        jPanel5.setBackground(new java.awt.Color(0, 102, 102));
+        jPanel5.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        avgBuy.setText("BUY");
+        jPanel5.add(avgBuy, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 60, 100, -1));
+
+        avgSell.setText("SELL");
+        jPanel5.add(avgSell, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 90, 90, -1));
+
+        jLabel9.setText("Average prices");
+        jPanel5.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 30, 90, -1));
+
+        jLabel10.setText("Profit/Loss");
+        jPanel5.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 70, -1, -1));
+
+        plLabel.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 2, true));
+        jPanel5.add(plLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 60, 120, 40));
+
+        jPanel2.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 320, 680, 190));
 
         main.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 0, 690, 510));
 
@@ -490,7 +692,8 @@ public class P2P extends javax.swing.JFrame {
         insert();
         buytableLoad();
         selltableLoad();
-        clear();
+       clear();
+       setAvg();
     }//GEN-LAST:event_insertBtnActionPerformed
 
     private void selltableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_selltableMouseClicked
@@ -531,6 +734,7 @@ public class P2P extends javax.swing.JFrame {
         update();
         buytableLoad();
         selltableLoad();
+        setAvg();
         clear();
     }//GEN-LAST:event_updateBtnActionPerformed
 
@@ -539,8 +743,50 @@ public class P2P extends javax.swing.JFrame {
         delete();
         buytableLoad();
         selltableLoad();
+        setAvg();
         clear();
     }//GEN-LAST:event_deleteBtnActionPerformed
+
+    private void deleteBtnFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_deleteBtnFocusGained
+        // TODO add your handling code here:
+        //System.out.println("focusing btn delete");
+    }//GEN-LAST:event_deleteBtnFocusGained
+
+    private void deleteBtnMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_deleteBtnMouseMoved
+        // TODO add your handling code here:
+        //System.out.println("focusing btn delete");
+       
+    }//GEN-LAST:event_deleteBtnMouseMoved
+
+    private void deleteBtnMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_deleteBtnMouseEntered
+        // TODO add your handling code here:
+         deleteAllBtn.setVisible(true);
+    }//GEN-LAST:event_deleteBtnMouseEntered
+
+    private void deleteBtnMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_deleteBtnMouseExited
+        // TODO add your handling code here:
+         deleteAllBtn.setVisible(false);
+    }//GEN-LAST:event_deleteBtnMouseExited
+
+    private void deleteAllBtnMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_deleteAllBtnMouseEntered
+        // TODO add your handling code here:
+         deleteAllBtn.setVisible(true);
+    }//GEN-LAST:event_deleteAllBtnMouseEntered
+
+    private void deleteAllBtnMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_deleteAllBtnMouseExited
+        // TODO add your handling code here:
+                 deleteAllBtn.setVisible(false);
+
+    }//GEN-LAST:event_deleteAllBtnMouseExited
+
+    private void deleteAllBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteAllBtnActionPerformed
+        // TODO add your handling code here:
+        deleteAll();
+         buytableLoad();
+        selltableLoad();
+        setAvg();
+        clear();
+    }//GEN-LAST:event_deleteAllBtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -578,14 +824,18 @@ public class P2P extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel avgBuy;
+    private javax.swing.JLabel avgSell;
     private javax.swing.JTable buytable;
     private com.toedter.calendar.JDateChooser datebox;
     private javax.swing.JTextField dealerbox;
+    private javax.swing.JButton deleteAllBtn;
     private javax.swing.JButton deleteBtn;
     private javax.swing.JButton exitBtn;
     private javax.swing.JLabel idlabel;
     private javax.swing.JButton insertBtn;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -593,15 +843,18 @@ public class P2P extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextField lkrbox;
     private javax.swing.JPanel main;
     private javax.swing.JTextField notebox;
+    private javax.swing.JLabel plLabel;
     private javax.swing.JTextField ratebox;
     private javax.swing.JTextField searchBox;
     private javax.swing.JTable selltable;
@@ -609,4 +862,6 @@ public class P2P extends javax.swing.JFrame {
     private javax.swing.JButton updateBtn;
     private javax.swing.JTextField usdtbox;
     // End of variables declaration//GEN-END:variables
+
+    
 }
